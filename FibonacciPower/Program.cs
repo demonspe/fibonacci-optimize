@@ -7,17 +7,26 @@ namespace FibonacciPower
   /// </summary>
   class Program
   {
+    #region Константы
+
+    /// <summary>
+    /// Номер члена последовательности Фибоначи, который необходимо вычислить.
+    /// </summary>
+    private const int FibonacciMemberNum = 45;
+
+    #endregion
+
     #region Поля и свойства
 
     /// <summary>
     /// Массив для кэширования подсчитанных сленов последовательности Фибоначи.
     /// </summary>
-    private static long[] cachedFibonacciMembers = new long[45];
+    private static long[] cachedFibonacciMembers = new long[FibonacciMemberNum + 1];
 
     /// <summary>
-    /// Счетчик количества вызовов функции для подсчета n-го члена последовательности.
+    /// Счетчик вызовов рекурсивных фенкций.
     /// </summary>
-    private static int calls = 0;
+    private static long recursiveCalls;
 
     #endregion
 
@@ -29,43 +38,29 @@ namespace FibonacciPower
     /// <param name="args">Аргументы.</param>
     static void Main(string[] args)
     {
+      long result;
+
+      Console.Write("Старт: Итеративный... ");
+      var watch = System.Diagnostics.Stopwatch.StartNew();
+      result = GetFibonacciMemberIterative(FibonacciMemberNum);
+      watch.Stop();
+      Console.WriteLine($"Результат: {result}. Время: {watch.Elapsed}.");
+
+      Console.Write("Старт: Рекурсивный... ");
+      recursiveCalls = 0;
+      watch = System.Diagnostics.Stopwatch.StartNew();
+      result = GetFibonacciMemberRecursive(FibonacciMemberNum);
+      watch.Stop();
+      Console.WriteLine($"Результат: {result}. Время: {watch.Elapsed}. Вызовы функций: {recursiveCalls}.");
+
+      Console.Write("Старт: Рекурсивный с кэшированием... ");
+      recursiveCalls = 0;
       cachedFibonacciMembers[0] = 0;
       cachedFibonacciMembers[1] = 1;
-      long result;
-      calls = 0;
-      var watch = System.Diagnostics.Stopwatch.StartNew();
-      result = GetFibonacciMemberIterative(33);
-      watch.Stop();
-      var elapsedMs = watch.ElapsedTicks;
-      Console.WriteLine($"Итеративный. Время: {elapsedMs} tics. Вызовы: {calls}.");
-
-      calls = 0;
       watch = System.Diagnostics.Stopwatch.StartNew();
-      result = GetFibonacciMemberRecursive(33);
+      result = GetFibonacciMemberRecursiveCached(FibonacciMemberNum);
       watch.Stop();
-      elapsedMs = watch.ElapsedTicks;
-      Console.WriteLine($"Рекурсивный. Время: {elapsedMs} tics. Вызовы: {calls}.");
-
-      calls = 0;
-      watch = System.Diagnostics.Stopwatch.StartNew();
-      result = GetFibonacciMemberRecursiveCached(33);
-      watch.Stop();
-      elapsedMs = watch.ElapsedTicks;
-      Console.WriteLine($"Рекурсивный с кэшированием 1. Время: {elapsedMs} tics. Вызовы функции: {calls}.");
-
-      calls = 0;
-      watch = System.Diagnostics.Stopwatch.StartNew();
-      result = GetFibonacciMemberRecursiveCached(33);
-      watch.Stop();
-      elapsedMs = watch.ElapsedTicks;
-      Console.WriteLine($"Рекурсивный с кэшированием 2. Время: {elapsedMs} tics. Вызовы функции: {calls}.");
-
-      calls = 0;
-      watch = System.Diagnostics.Stopwatch.StartNew();
-      result = GetFibonacciMemberRecursiveCached(33);
-      watch.Stop();
-      elapsedMs = watch.ElapsedTicks;
-      Console.WriteLine($"Рекурсивный с кэшированием 3. Время: {elapsedMs} tics. Вызовы функции: {calls}.");
+      Console.WriteLine($"Результат: {result}. Время: {watch.Elapsed}. Вызовы функций: {recursiveCalls}.");
       Console.Read();
     }
 
@@ -76,7 +71,6 @@ namespace FibonacciPower
     /// <returns>n-й член последовательности.</returns>
     private static long GetFibonacciMemberIterative(int n)
     {
-      calls++;
       if (n <= 0) return 0;
       if (n == 1) return 1;
       if (n == 2) return 1;
@@ -97,7 +91,7 @@ namespace FibonacciPower
     /// <returns>n-й член последовательности.</returns>
     private static long GetFibonacciMemberRecursive(int n)
     {
-      calls++;
+      recursiveCalls++;
       if (n <= 0) return 0;
       if (n == 1) return 1;
       return GetFibonacciMemberRecursive(n - 2) + GetFibonacciMemberRecursive(n - 1);
@@ -110,7 +104,7 @@ namespace FibonacciPower
     /// <returns>n-й член последовательности.</returns>
     private static long GetFibonacciMemberRecursiveCached(int n)
     {
-      calls++;
+      recursiveCalls++;
       if (n <= 0) return cachedFibonacciMembers[0];
       if (n == 1) return cachedFibonacciMembers[1];
       if (cachedFibonacciMembers[n] != 0)
